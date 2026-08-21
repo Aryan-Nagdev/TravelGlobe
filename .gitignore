@@ -1,0 +1,30 @@
+# Dependency & build directories
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+
+# Environments & secrets
+.env
+*.env
+backend/.env
+backend/.venv/
+frontend/.env
+frontend/.env.local
+
+# Python cache & artifacts
+__pycache__/
+*.pyc
+*.pyo
+backend/__pycache__/
+.pytest_cache/
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Documentation extracts / temporary work
+_doc_extract.txt
+_doc_media/

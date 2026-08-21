@@ -1,0 +1,14 @@
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.10.3
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+httpx>=0.27.0,<0.29.0
+supabase>=2.30.0
+groq==0.13.0
+tenacity==9.0.0
+python-json-logger==3.2.1
+holidays==0.63
+chromadb>=0.5.23
+fastembed>=0.4.2
+beautifulsoup4>=4.12.0
