@@ -1,0 +1,4 @@
+backend/jobs/**/*.sh text eol=lf
+backend/jobs/mapreduce/mapper.py text eol=lf
+backend/jobs/mapreduce/reducer.py text eol=lf
+backend/jobs/spark/*.py text eol=lf

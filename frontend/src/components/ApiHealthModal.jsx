@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Activity, CheckCircle2, AlertCircle, RefreshCw, Cpu, Database, Cloud, Radio, Map } from 'lucide-react';
+import { X, Activity, CheckCircle2, AlertCircle, RefreshCw, Cpu, Database, Cloud, Radio, Map, Share2, Network } from 'lucide-react';
 
 export default function ApiHealthModal({ isOpen, onClose }) {
   const [statusData, setStatusData] = useState(null);
@@ -27,14 +27,15 @@ export default function ApiHealthModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const services = [
+    { key: "hadoop_hdfs", name: "Hadoop HDFS", icon: Database, desc: "Destination, SAR, and event storage" },
+    { key: "apache_kafka", name: "Apache Kafka", icon: Radio, desc: "Search, analysis, chat, and SAR events" },
+    { key: "hadoop_mapreduce", name: "Hadoop MapReduce", icon: Cpu, desc: "Destination popularity aggregation" },
+    { key: "apache_spark", name: "Apache Spark", icon: Network, desc: "Cluster analytics over HDFS event logs" },
+    { key: "pagerank", name: "Spark PageRank", icon: Share2, desc: "Destination graph ranking" },
     { key: "groq_llm", name: "Groq Cloud AI LLM", icon: Cpu, desc: "Llama-3.3-70B Chat Assistant" },
     { key: "openweather", name: "OpenWeather API", icon: Cloud, desc: "Live Weather & 5-Day Forecast" },
-    { key: "supabase", name: "Supabase Database", icon: Database, desc: "Persistence & Chat Logs" },
-    { key: "nominatim_geocoding", name: "Nominatim Geocoding", icon: Map, desc: "Global Coordinate Resolution" },
-    { key: "photon_autocomplete", name: "Photon Autocomplete", icon: Map, desc: "Search Suggestions" },
-    { key: "osrm_routing", name: "OSRM Routing Engine", icon: Map, desc: "Travel Distance & Traffic Duration" },
-    { key: "overpass_poi", name: "Overpass POI Search", icon: Map, desc: "Hotel & Sightseeing Discovery" },
-    { key: "copernicus_sar", name: "Copernicus STAC SAR", icon: Radio, desc: "ESA Sentinel Flood & Satellite Radar" }
+    { key: "nominatim", name: "Nominatim Geocoding", icon: Map, desc: "Global Coordinate Resolution" },
+    { key: "osrm", name: "OSRM Routing Engine", icon: Map, desc: "Travel Distance & Traffic Duration" },
   ];
 
   return (
@@ -56,7 +57,6 @@ export default function ApiHealthModal({ isOpen, onClose }) {
         background: 'rgba(15, 23, 42, 0.95)',
         borderColor: 'rgba(6, 182, 212, 0.3)'
       }}>
-        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Activity color="#06b6d4" size={24} className="pulse-animation" />
@@ -72,12 +72,11 @@ export default function ApiHealthModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '360px', overflowY: 'auto', marginBottom: '20px' }}>
           {services.map((svc, idx) => {
             const Icon = svc.icon;
             const info = statusData ? statusData[svc.key] : null;
-            const isOk = info ? (info.status === 'connected' || info.status === 'configured') : true;
+            const isOk = info ? (info.status === 'connected' || info.status === 'configured' || info.status === 'has-output' || info.status === 'active_assistant' || info.status === 'weather_service') : true;
 
             return (
               <div key={idx} style={{
@@ -105,7 +104,6 @@ export default function ApiHealthModal({ isOpen, onClose }) {
           })}
         </div>
 
-        {/* Actions */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button onClick={fetchStatus} disabled={loading} className="btn-secondary" style={{ padding: '8px 16px', fontSize: '0.825rem' }}>
             <RefreshCw size={14} className={loading ? "spin-animation" : ""} /> Refresh Status

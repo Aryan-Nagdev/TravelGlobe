@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, Globe, Sparkles, Bot, Building, MapPin, Calendar, Heart } from 'lucide-react';
+import { Globe, Bot, MapPin, Calendar, Database } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, onToggleChat }) {
   return (
@@ -62,6 +62,14 @@ export default function Navbar({ activeTab, setActiveTab, onToggleChat }) {
             style={{ padding: '8px 18px', fontSize: '0.875rem' }}
           >
             <Calendar size={16} /> Trip Planner
+          </button>
+
+          <button
+            onClick={() => setActiveTab('bigdata')}
+            className={activeTab === 'bigdata' ? 'btn-brand' : 'btn-ghost'}
+            style={{ padding: '8px 18px', fontSize: '0.875rem' }}
+          >
+            <Database size={16} /> Big Data
           </button>
         </nav>
 

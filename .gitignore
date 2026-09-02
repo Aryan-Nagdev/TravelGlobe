@@ -4,13 +4,7 @@ frontend/node_modules/
 frontend/dist/
 dist/
 
-# Environments & secrets
-.env
-*.env
-backend/.env
-backend/.venv/
-frontend/.env
-frontend/.env.local
+
 
 # Python cache & artifacts
 __pycache__/
@@ -28,3 +22,4 @@ Thumbs.db
 # Documentation extracts / temporary work
 _doc_extract.txt
 _doc_media/
+backend/.venv/

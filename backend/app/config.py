@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
 class Settings(BaseSettings):
-    APP_NAME: str = "TravelGuard AI"
+    APP_NAME: str = "TravelGlobe"
     APP_ENV: str = "development"
     APP_DEBUG: bool = True
     API_V1_PREFIX: str = "/api/v1"
@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     CHROMA_PERSIST_DIR: str = "data/chroma"
     RAG_TOP_K: int = 8
     EMBEDDING_MODEL: str = "BAAI/bge-small-en-v1.5"
+
+    # Big Data cluster (Docker)
+    HDFS_WEBHDFS: str = Field(default="http://localhost:9870", env="HDFS_WEBHDFS")
+    KAFKA_BOOTSTRAP: str = Field(default="localhost:9094", env="KAFKA_BOOTSTRAP")
+    SPARK_UI: str = Field(default="http://localhost:8080", env="SPARK_UI")
 
     model_config = SettingsConfigDict(
         env_file=".env",

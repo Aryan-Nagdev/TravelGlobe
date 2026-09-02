@@ -1,0 +1,8 @@
+{"event_type":"destination.search","place_name":"Manali","origin":"Mumbai","crowd_score":45,"flood_score":12}
+{"event_type":"destination.search","place_name":"Paris","origin":"London","crowd_score":78,"flood_score":10}
+{"event_type":"destination.search","place_name":"Goa","origin":"Mumbai","crowd_score":80,"flood_score":48}
+{"event_type":"destination.search","place_name":"Tokyo","origin":"Singapore","crowd_score":70,"flood_score":8}
+{"event_type":"destination.search","place_name":"Manali","origin":"Delhi","crowd_score":45,"flood_score":12}
+{"event_type":"sar.assessed","place_name":"Manali","flood_score":12,"landslide_score":35}
+{"event_type":"destination.search","place_name":"Dubai","origin":"Mumbai","crowd_score":62,"flood_score":5}
+{"event_type":"destination.search","place_name":"London","origin":"Paris","crowd_score":75,"flood_score":20}

@@ -11,7 +11,8 @@ export default function DestinationDashboard({ data }) {
 
   if (!data) return null;
 
-  const { destination, weather, crowd, routing, recommendations, photos } = data;
+  const { destination, weather, crowd, routing, recommendations, photos, bigdata, safety, related_destinations } = data;
+  const related = related_destinations || recommendations?.pagerank_related || [];
   const placePhotos = photos && photos.length > 0 ? photos : [
     "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=80"
   ];
@@ -32,6 +33,12 @@ export default function DestinationDashboard({ data }) {
             </h2>
             <p style={{ fontSize: '0.95rem', color: '#94a3b8', marginTop: '6px' }}>
               Located in {destination.country || 'Global'} • Coordinates: {destination.lat.toFixed(2)}°N, {destination.lon.toFixed(2)}°E
+              {bigdata?.pagerank != null && (
+                <> • Spark PageRank {Number(bigdata.pagerank).toFixed(4)}</>
+              )}
+              {safety?.overall_score != null && (
+                <> • Safety {safety.overall_score}/100</>
+              )}
             </p>
           </div>
 
@@ -92,6 +99,38 @@ export default function DestinationDashboard({ data }) {
             </div>
           ))}
         </div>
+
+        {(bigdata || related.length > 0) && (
+          <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+            {bigdata?.storage && (
+              <span className="tag-badge tag-blue">HDFS stored</span>
+            )}
+            {bigdata?.pagerank != null && (
+              <span className="tag-badge tag-emerald">Spark PageRank {Number(bigdata.pagerank).toFixed(4)}</span>
+            )}
+            {bigdata?.mapreduce_search_count != null && (
+              <span className="tag-badge tag-amber">MapReduce searches {bigdata.mapreduce_search_count}</span>
+            )}
+            {crowd?.mapreduce_search_count != null && bigdata?.mapreduce_search_count == null && (
+              <span className="tag-badge tag-amber">MapReduce searches {crowd.mapreduce_search_count}</span>
+            )}
+          </div>
+        )}
+
+        {related.length > 0 && (
+          <div style={{ marginTop: '16px' }}>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase' }}>
+              Related destinations (Spark PageRank)
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {related.map((row) => (
+                <span key={row.destination} className="tag-badge tag-blue" style={{ fontSize: '0.8rem' }}>
+                  {row.destination} · {Number(row.pagerank).toFixed(4)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
 

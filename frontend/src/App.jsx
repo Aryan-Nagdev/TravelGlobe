@@ -4,6 +4,8 @@ import HeroSearch from './components/HeroSearch';
 import DestinationDashboard from './components/DestinationDashboard';
 import AiAssistantDrawer from './components/AiAssistantDrawer';
 import ItineraryPlanner from './components/ItineraryPlanner';
+import BigDataInsights from './components/BigDataInsights';
+import EmergencyPortal from './components/EmergencyPortal';
 import { Loader2, Globe } from 'lucide-react';
 
 export default function App() {
@@ -86,6 +88,14 @@ export default function App() {
             {activeTab === 'itinerary' && (
               <ItineraryPlanner destinationData={currentDestinationData} />
             )}
+
+            {activeTab === 'bigdata' && (
+              <BigDataInsights />
+            )}
+
+            {activeTab === 'dashboard' && currentDestinationData?.sar_disaster && (
+              <EmergencyPortal destinationData={currentDestinationData} />
+            )}
           </>
         )}
       </main>
@@ -104,7 +114,7 @@ export default function App() {
             <Globe size={18} color="#60a5fa" /> TravelGlobe Commercial Platform
           </div>
           <div>
-            Powered by OpenStreetMap, OpenWeather, OSRM & Groq AI
+            Powered by Hadoop HDFS, MapReduce, Kafka, Spark PageRank, OpenWeather & Groq AI
           </div>
           <div>
             © 2026 TravelGlobe Inc. All rights reserved.
