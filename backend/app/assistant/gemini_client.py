@@ -31,22 +31,29 @@ async def call_gemini_generate(
     if not api_key:
         return None
 
-    # Prioritize fast, reliable models
-    preferred_model = settings.GEMINI_MODEL or "gemini-3.5-flash-lite"
-    models_to_try = [preferred_model, "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-3.5-flash"]
+    # Prioritize fast, verified models
+    preferred_model = settings.GEMINI_MODEL or "gemini-3.5-flash"
+    models_to_try = [preferred_model, "gemini-3.5-flash", "gemini-3.5-flash-lite"]
     models_to_try = list(dict.fromkeys(models_to_try))
 
     contents = []
     
-    # Format chat history
+    # Format chat history (Gemini requires the first turn to be 'user')
     if chat_history:
         for turn in chat_history[-4:]:
             role = turn.get("role", "user")
             gemini_role = "model" if role in ["assistant", "model"] else "user"
-            contents.append({
-                "role": gemini_role,
-                "parts": [{"text": turn.get("content", "")}]
-            })
+            text_val = (turn.get("content") or "").strip()
+            # Ignore previous error notices in history
+            if text_val and "Server connection issue" not in text_val:
+                contents.append({
+                    "role": gemini_role,
+                    "parts": [{"text": text_val}]
+                })
+        
+        # Gemini API requires first turn to be 'user'
+        while contents and contents[0].get("role") == "model":
+            contents.pop(0)
 
     # Append current user prompt
     contents.append({
@@ -70,7 +77,7 @@ async def call_gemini_generate(
     for model_name in models_to_try:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=7.0) as client:
                 resp = await client.post(url, json=payload)
                 if resp.status_code == 200:
                     data = resp.json()
@@ -87,7 +94,7 @@ async def call_gemini_generate(
 
     return None
 
-async def call_groq_generate(
+def call_groq_generate(
     system_instruction: str,
     prompt: str,
     chat_history: Optional[List[Dict[str, str]]] = None
@@ -104,7 +111,9 @@ async def call_groq_generate(
     if chat_history:
         for turn in chat_history[-4:]:
             role = "assistant" if turn.get("role") in ["assistant", "model"] else "user"
-            messages.append({"role": role, "content": turn.get("content", "")})
+            content = turn.get("content", "")
+            if content and "Server connection issue" not in content:
+                messages.append({"role": role, "content": content})
 
     messages.append({"role": "user", "content": prompt})
 
@@ -129,25 +138,37 @@ async def generate_llm_response(
     Main entry point for LLM inference.
     Executes Gemini -> Groq -> Heuristic fallback with full reliability.
     """
-    # 1. Try Gemini
-    gemini_resp = await call_gemini_generate(system_instruction, prompt, chat_history)
-    if gemini_resp:
-        return {
-            "answer": gemini_resp,
-            "model": settings.GEMINI_MODEL,
-            "provider": "Google Gemini",
-            "is_llm": True
-        }
+    import asyncio
+    # 1. Try Gemini with strict timeout to avoid connection drop
+    try:
+        gemini_resp = await asyncio.wait_for(
+            call_gemini_generate(system_instruction, prompt, chat_history),
+            timeout=10.0
+        )
+        if gemini_resp:
+            return {
+                "answer": gemini_resp,
+                "model": settings.GEMINI_MODEL or "gemini-3.5-flash",
+                "provider": "Google Gemini",
+                "is_llm": True
+            }
+    except Exception as e:
+        print(f"[Gemini AI] Fast failover notice: {e}")
 
-    # 2. Try Groq
-    groq_resp = await call_groq_generate(system_instruction, prompt, chat_history)
-    if groq_resp:
-        return {
-            "answer": groq_resp,
-            "model": settings.GROQ_MODEL,
-            "provider": "Groq",
-            "is_llm": True
-        }
+    # 2. Try Groq (run in worker thread so event loop is never blocked)
+    try:
+        groq_resp = await asyncio.to_thread(
+            call_groq_generate, system_instruction, prompt, chat_history
+        )
+        if groq_resp:
+            return {
+                "answer": groq_resp,
+                "model": settings.GROQ_MODEL,
+                "provider": "Groq",
+                "is_llm": True
+            }
+    except Exception as e:
+        print(f"[Groq AI] Fast failover notice: {e}")
 
     return {
         "answer": None,
