@@ -44,6 +44,7 @@ async def lifespan(app: FastAPI):
         "/travelglobe/analytics",
     ):
         hdfs_store.mkdir(path)
+    hdfs_store.ensure_seed_data()
     kafka_bus.start_background()
     yield
 
@@ -103,14 +104,32 @@ def create_app() -> FastAPI:
         try:
             geo = await geocode_place(req.place_name)
             lat, lon = geo["lat"], geo["lon"]
-            place_clean = geo["city"] or req.place_name
+            place_clean = req.place_name.strip()
 
-            origin_lat = req.origin_lat or 19.0760
-            origin_lon = req.origin_lon or 72.8777
-            origin_city = req.origin_city or "Mumbai"
+            origin_city = req.origin_city.strip() if (req.origin_city and req.origin_city.strip()) else None
+            origin_lat = req.origin_lat
+            origin_lon = req.origin_lon
+
+            if origin_city:
+                if origin_lat is None or origin_lon is None:
+                    try:
+                        orig_geo = await geocode_place(origin_city)
+                        origin_lat = orig_geo["lat"]
+                        origin_lon = orig_geo["lon"]
+                        origin_city = orig_geo.get("city") or origin_city
+                    except Exception:
+                        origin_lat = None
+                        origin_lon = None
 
             weather_task = get_weather_forecast(lat, lon, place_clean)
-            routing_task = get_travel_route_heuristics(lat, lon, origin_lat, origin_lon)
+            routing_task = get_travel_route_heuristics(
+                dest_lat=lat,
+                dest_lon=lon,
+                origin_lat=origin_lat,
+                origin_lon=origin_lon,
+                origin_name=origin_city,
+                dest_name=place_clean
+            )
             recommendations_task = get_hotel_and_attraction_recommendations(lat, lon, place_clean)
 
             weather, routing, recommendations = await asyncio.gather(
@@ -119,8 +138,8 @@ def create_app() -> FastAPI:
                 recommendations_task,
             )
 
-            crowd = analyze_crowd_density(lat, lon, place_clean)
-            photos = get_destination_photos(place_clean)
+            crowd = analyze_crowd_density(lat, lon, place_clean, weather_data=weather)
+            photos = recommendations.get("photos") or (await get_destination_photos(place_clean))
             sar_disaster = await assess_sar_disaster_risk(
                 lat, lon, place_clean, weather.get("condition", "")
             )
@@ -154,7 +173,9 @@ def create_app() -> FastAPI:
         place = ""
         if req.destination_context:
             place = (req.destination_context.get("destination") or {}).get("city") or ""
-        pipeline.persist_chat(req.message, response, place)
+        
+        # Persist event asynchronously without blocking chat response
+        asyncio.create_task(asyncio.to_thread(pipeline.persist_chat, req.message, response, place))
         return response
 
     @app.get(f"{settings.API_V1_PREFIX}/bigdata/status")

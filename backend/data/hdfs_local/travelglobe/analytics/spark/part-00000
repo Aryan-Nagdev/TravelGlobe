@@ -1,0 +1,6 @@
+{"place_name":"Manali","event_count":42,"avg_crowd_score":45.0,"avg_flood_score":12.0,"engine":"apache-spark"}
+{"place_name":"Paris","event_count":38,"avg_crowd_score":78.0,"avg_flood_score":10.0,"engine":"apache-spark"}
+{"place_name":"Goa","event_count":35,"avg_crowd_score":80.0,"avg_flood_score":48.0,"engine":"apache-spark"}
+{"place_name":"Tokyo","event_count":31,"avg_crowd_score":70.0,"avg_flood_score":8.0,"engine":"apache-spark"}
+{"place_name":"Dubai","event_count":28,"avg_crowd_score":62.0,"avg_flood_score":5.0,"engine":"apache-spark"}
+{"place_name":"London","event_count":26,"avg_crowd_score":75.0,"avg_flood_score":20.0,"engine":"apache-spark"}

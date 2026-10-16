@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = Field(default="", env="GROQ_API_KEY")
     GROQ_MODEL: str = Field(default="llama-3.3-70b-versatile", env="GROQ_MODEL")
 
+    # Gemini
+    GEMINI_API_KEY: str = Field(default="", env="GEMINI_API_KEY")
+    GEMINI_MODEL: str = Field(default="gemini-3.5-flash-lite", env="GEMINI_MODEL")
+
     # Supabase
     SUPABASE_URL: str = Field(default="", env="SUPABASE_URL")
     SUPABASE_ANON_KEY: str = Field(default="", env="SUPABASE_ANON_KEY")

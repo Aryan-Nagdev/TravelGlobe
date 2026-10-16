@@ -1,9 +1,15 @@
 import React from 'react';
-import { ShieldAlert, PhoneCall, Radio, AlertOctagon, LifeBuoy, MapPin, ExternalLink, HeartPulse } from 'lucide-react';
+import MapView from './MapView';
+import { ShieldAlert, PhoneCall, Radio, AlertOctagon, LifeBuoy, MapPin, ExternalLink, HeartPulse, Satellite } from 'lucide-react';
 
 export default function EmergencyPortal({ destinationData }) {
   const sarAlerts = destinationData?.sar_disaster?.active_disaster_alerts || [];
   const placeName = destinationData?.destination?.city || "Current Location";
+  const lat = destinationData?.destination?.lat || 20.0;
+  const lon = destinationData?.destination?.lon || 78.0;
+  const copernicus = destinationData?.sar_disaster?.copernicus_satellite || {};
+  const floodRisk = destinationData?.sar_disaster?.flood_risk || {};
+  const landslideRisk = destinationData?.sar_disaster?.landslide_risk || {};
 
   const helplines = [
     { title: "National Emergency Helpline", number: "112", desc: "Immediate Police, Fire & Medical Response", icon: PhoneCall, color: "#f43f5e" },
@@ -84,6 +90,91 @@ export default function EmergencyPortal({ destinationData }) {
           </p>
         </div>
       )}
+
+      {/* ── SAR Satellite Terrain Map ────────────────────────────── */}
+      <div className="glass-card" style={{ padding: '24px', marginBottom: '28px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '9px',
+            background: 'rgba(6, 182, 212, 0.15)', border: '1px solid rgba(6, 182, 212, 0.35)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <Radio size={18} color="#06b6d4" />
+          </div>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#f8fafc' }}>
+            SAR Satellite Terrain View — {placeName}
+          </h3>
+          <span className="tag-badge tag-blue" style={{ fontSize: '0.72rem' }}>Esri World Imagery</span>
+          {copernicus.status && (
+            <span className="tag-badge tag-emerald" style={{ fontSize: '0.72rem' }}>
+              🛠️ {copernicus.constellation || 'Sentinel-1 SAR'}
+            </span>
+          )}
+        </div>
+
+        {/* Satellite Map */}
+        <MapView
+          lat={lat}
+          lon={lon}
+          zoom={10}
+          height="380px"
+          satellite={true}
+          marker={{ lat, lon, label: `🚨 ${placeName} — SAR Monitoring Zone` }}
+          borderRadius="12px"
+        />
+
+        {/* Copernicus / Sentinel details row */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: '12px',
+          marginTop: '16px'
+        }}>
+          {[
+            { label: 'Satellite System', value: copernicus.constellation || 'Sentinel-1 SAR' },
+            { label: 'Status', value: copernicus.status || 'Monitoring Active' },
+            { label: 'Last Pass', value: copernicus.last_pass || '< 24 hours ago' },
+            { label: 'Coverage', value: copernicus.coverage || '100% Region' },
+          ].map((item, idx) => (
+            <div key={idx} style={{
+              background: 'rgba(6,182,212,0.07)',
+              border: '1px solid rgba(6,182,212,0.18)',
+              borderRadius: '10px',
+              padding: '10px 14px'
+            }}>
+              <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', marginBottom: '4px' }}>
+                {item.label}
+              </div>
+              <div style={{ fontSize: '0.875rem', color: '#e2e8f0', fontWeight: 600 }}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Risk Score Bar */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '14px' }}>
+          {[
+            { label: 'Flood Risk Score', score: floodRisk.score || 0, level: floodRisk.level || 'Low / Safe', color: floodRisk.color === 'red' ? '#f43f5e' : floodRisk.color === 'amber' ? '#f59e0b' : '#10b981' },
+            { label: 'Landslide Risk Score', score: landslideRisk.score || 0, level: landslideRisk.level || 'Low / Stable', color: landslideRisk.color === 'red' ? '#f43f5e' : landslideRisk.color === 'amber' ? '#f59e0b' : '#10b981' },
+          ].map((r, idx) => (
+            <div key={idx} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '0.775rem', color: '#94a3b8', fontWeight: 700 }}>{r.label}</span>
+                <span style={{ fontSize: '0.775rem', color: r.color, fontWeight: 700 }}>{r.level}</span>
+              </div>
+              <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '9999px', height: '6px', overflow: 'hidden' }}>
+                <div style={{
+                  width: `${r.score}%`,
+                  height: '100%',
+                  background: r.color,
+                  borderRadius: '9999px',
+                  transition: 'width 0.8s ease'
+                }} />
+              </div>
+              <div style={{ fontSize: '0.725rem', color: '#64748b', marginTop: '3px' }}>{r.score}/100</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Helplines Grid */}
       <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc', marginBottom: '14px' }}>

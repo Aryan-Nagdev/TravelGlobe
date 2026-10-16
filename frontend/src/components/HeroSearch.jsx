@@ -63,8 +63,8 @@ export default function HeroSearch({ onSearch, isLoading, currentDestination }) 
     onSearch(name);
   };
 
-  // High-res hero background photo based on selected city
-  const heroPhoto = currentDestination?.photos?.[0] || "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80";
+  // High-res hero background photo based on selected city (only if authentic photo exists)
+  const heroPhoto = currentDestination?.photos?.[0] || null;
 
   return (
     <div style={{
@@ -74,20 +74,23 @@ export default function HeroSearch({ onSearch, isLoading, currentDestination }) 
       alignItems: 'center',
       justifyContent: 'center',
       padding: '60px 24px 40px 24px',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      background: heroPhoto ? 'transparent' : 'radial-gradient(ellipse at top, #1e3a8a 0%, #0b132b 75%)'
     }}>
-      {/* Background Hero Travel Wallpaper */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        backgroundImage: `url(${heroPhoto})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        filter: 'brightness(0.38) contrast(1.1)',
-        transform: 'scale(1.02)',
-        transition: 'background-image 0.6s ease-in-out',
-        zIndex: 0
-      }} />
+      {/* Background Hero Travel Wallpaper (only rendered if verified photo exists) */}
+      {heroPhoto && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `url(${heroPhoto})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.38) contrast(1.1)',
+          transform: 'scale(1.02)',
+          transition: 'background-image 0.6s ease-in-out',
+          zIndex: 0
+        }} />
+      )}
 
       <div style={{ position: 'relative', zIndex: 1, maxWidth: '1000px', width: '100%', textAlign: 'center' }}>
         

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, Sparkles } from 'lucide-react';
+import MarkdownView from './MarkdownView';
 
 export default function AiAssistantDrawer({ isOpen, onClose, destinationData }) {
   const [messages, setMessages] = useState([
@@ -156,9 +157,13 @@ export default function AiAssistantDrawer({ isOpen, onClose, destinationData }) 
               borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
               fontSize: '0.9rem',
               lineHeight: 1.55,
-              whiteSpace: 'pre-line'
+              wordBreak: 'break-word'
             }}>
-              {msg.content}
+              {msg.role === 'assistant' ? (
+                <MarkdownView content={msg.content} />
+              ) : (
+                <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
+              )}
             </div>
           </div>
         ))}
